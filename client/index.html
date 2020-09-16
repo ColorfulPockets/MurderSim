@@ -2,6 +2,10 @@
     <title id='title'>Murder Sim!</title>
 </head>
 
+<audio id="Song 1" src="Song1.mp3" type="audio/mp3"> </audio>
+<audio id="Song 2" src="Song2.mp3" type="audio/mp3"> </audio>
+<audio id="Song 3" src="Song3.mp3" type="audio/mp3"> </audio>
+
 <div id='div0' style='font-size: 20vw;
     position: fixed;
     top: 200px; left: 50%;
@@ -17,6 +21,7 @@
 
 <br><br>
 
+<audio src="Song1.mp3" controls id='audioSetUp'></audio>
 <button onclick="meetingButton()" id = 'b2'>Satellite</button>
 <button onclick="task()" id = 'b3'>Special Task</button>
 <br><br>
@@ -28,6 +33,9 @@
 var socket = io();
 
 var div0 = document.getElementById('div0');
+var song1 = document.getElementById('Song 1');
+var song2 = document.getElementById('Song 2');
+var song3 = document.getElementById('Song 3');
 
 // listens for timer updates
 socket.on('updateTimer', function(data) {
@@ -99,6 +107,16 @@ function callMeeting() {
 
     document.body.style = "background-color:red";
 
+    switch (Math.floor(Math.random() * 3)) {
+        case 0: song1.play();
+            break;
+        case 1: song2.play();
+            break;
+        case 2: song3.play();
+            break;
+        default: break;
+    }
+
     document.getElementById('headline').innerHTML = "EMERGENCY MEETING";
     
     var emergencyButton = document.getElementById('emergencyButton');
@@ -141,6 +159,7 @@ function removeButtons() {
     document.getElementById("b1").remove();
     document.getElementById("b2").remove();
     document.getElementById("b3").remove();
+    document.getElementById("audioSetUp").remove();
 }
 
 </script>
