@@ -21,7 +21,6 @@
 
 <br><br>
 
-<audio src="Song1.mp3" controls id='audioSetUp'></audio>
 <button onclick="meetingButton()" id = 'b2'>Satellite</button>
 <button onclick="task()" id = 'b3'>Special Task</button>
 <br><br>
@@ -29,7 +28,6 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-
 var socket = io();
 
 var div0 = document.getElementById('div0');
@@ -53,14 +51,28 @@ socket.on('endMeeting', function () {
     endMeeting();
 })
 
+// song is an integer which selects which song should play
+var song = 0;
+socket.on('songSelect', function(data) {
+    song = data.song;
+})
+
 // Starts the timer and puts you in the game
 function startGame() {
     socket.emit('endMeeting');
+    socket.emit('resetTimer');
     meetingButton();
 }
 
 // Performs initial setup - creates the button, puts you in correct room
 function meetingButton() {
+
+    song1.play();
+    song1.pause();
+    song2.play();
+    song2.pause();
+    song3.play();
+    song3.pause();
 
     socket.emit('type', {
         type: 'meeting'
@@ -107,12 +119,15 @@ function callMeeting() {
 
     document.body.style = "background-color:red";
 
-    switch (Math.floor(Math.random() * 3)) {
-        case 0: song1.play();
+    switch (song) {
+        case 0: song1.currentTime = 0; 
+            song1.play();
             break;
-        case 1: song2.play();
+        case 1: song2.currentTime = 0;
+            song2.play();
             break;
-        case 2: song3.play();
+        case 2: song3.currentTime = 0;
+            song3.play();
             break;
         default: break;
     }
@@ -131,6 +146,9 @@ function callMeeting() {
 }
 
 function endMeeting() {
+    song1.pause();
+    song2.pause();
+    song3.pause();
 
     document.body.style = "background-color:green";
 
@@ -159,7 +177,6 @@ function removeButtons() {
     document.getElementById("b1").remove();
     document.getElementById("b2").remove();
     document.getElementById("b3").remove();
-    document.getElementById("audioSetUp").remove();
 }
 
 </script>

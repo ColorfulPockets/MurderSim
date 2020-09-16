@@ -1,6 +1,7 @@
 /*-------THIS STUFF IS APPARENTLY JUST NECESSARY---------
 --------AND NOBODY IN THE WORLD KNOWS HOW IT WORKS------*/
 var express = require('express');
+const { emit } = require('process');
 var app = express();
 var serv = require('http').Server(app);
 
@@ -8,6 +9,8 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
 });
 app.use('client', express.static(__dirname + '/client'));
+app.use(express.static('sounds'));
+app.get('/favicon.ico', (req, res) => res.status(204));
 
 /*-----------------END MYSTERY STUFF-------------------
 -----(just kidding, it's briefly explained at:---------
@@ -37,19 +40,36 @@ io.sockets.on('connection', function(socket) {
         socket.type = data.type;
     })
 
-    socket.on('callMeeting', function() {
+    socket.on('stopTimer', function() {
         timerStop = true;
+    })
+
+    socket.on('resetTimer', function() {
+        timer = 600000;
+    })
+
+    socket.on('callMeeting', function() {
+        var song = Math.floor(Math.random() * 3);
         for (var i in SOCKET_LIST) {
             var socket = SOCKET_LIST[i];
-            socket.emit('callMeeting');
+            if (socket.type == 'meeting'){
+                socket.emit('songSelect', {
+                    song: song
+                });
+                socket.emit('callMeeting');
+            }
         }
+        timerStop = true;
     });
 
     socket.on('endMeeting', function() {
         timerStop = false;
         for (var i in SOCKET_LIST) {
             var socket = SOCKET_LIST[i];
-            socket.emit('endMeeting');
+            if (socket.type == 'meeting'){
+                socket.emit('endMeeting');
+        
+            }
         }
     });
 })
@@ -59,9 +79,11 @@ setInterval(function() {
         timer -= 1000;
         for (var i in SOCKET_LIST) {
             var socket = SOCKET_LIST[i];
-            socket.emit('updateTimer', {
-                date: timer
-            });
+            if (socket.type == 'meeting'){
+                socket.emit('updateTimer', {
+                    date: timer
+                });
+            }
         }
     }
 }, 1000)
