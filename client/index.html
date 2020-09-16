@@ -1,0 +1,42 @@
+<head>
+    <title id='title'>Murder Sim!</title>
+</head>
+
+<h1 id='headline'>Welcome to MurderSim!  Select whether this device is
+     the main meeting room device, or if it's a satellite.
+</h1>
+
+<br><br>
+
+<button onclick="mainRoom()" id = 'b1'>Main Meeting Room</button>
+<button onclick="satellite()" id = 'b2'>Satellite</button>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+
+var socket = io();
+
+var random = Math.random();
+
+function mainRoom() {
+    socket.emit('type', {
+        type = 'main'
+    });
+
+    removeButtons();
+}
+
+function satellite() {
+    socket.emit('type', {
+        type = 'satellite'
+    });
+
+    removeButtons();
+}
+
+function removeButtons() {
+    document.getElementById("b1").remove;
+    document.getElementById("b2").remove;
+}
+
+</script>
