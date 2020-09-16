@@ -20,6 +20,8 @@ var io = require('socket.io')(serv,{});
 
 // SOCKET_LIST contains a list of all clients (sockets) currently connected
 var SOCKET_LIST = {};
+var timer = 600000;
+var timerStop = true;
 
 // Whenever there is a connection, this function will be called automatically
 io.sockets.on('connection', function(socket) {
@@ -34,16 +36,32 @@ io.sockets.on('connection', function(socket) {
     socket.on('type', function(data) {
         socket.type = data.type;
     })
+
+    socket.on('callMeeting', function() {
+        timerStop = true;
+        for (var i in SOCKET_LIST) {
+            var socket = SOCKET_LIST[i];
+            socket.emit('callMeeting');
+        }
+    });
+
+    socket.on('endMeeting', function() {
+        timerStop = false;
+        for (var i in SOCKET_LIST) {
+            var socket = SOCKET_LIST[i];
+            socket.emit('endMeeting');
+        }
+    });
 })
 
 setInterval(function() {
-    for (var i in SOCKET_LIST) {
-        var socket = SOCKET_LIST[i];
-        socket.x++;
-        socket.y++;
-        socket.emit('newPosition', {
-            x: socket.x,
-            y: socket.y
-        })
+    if (!timerStop) {
+        timer -= 1000;
+        for (var i in SOCKET_LIST) {
+            var socket = SOCKET_LIST[i];
+            socket.emit('updateTimer', {
+                date: timer
+            });
+        }
     }
-}, 1000/25)
+}, 1000)
