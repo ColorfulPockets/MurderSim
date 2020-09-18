@@ -16,84 +16,41 @@
         text-align: center;'>
 </h1>
 
-<div id='div0.5' style='font-size: 20vw;'></div>
+<div id='divHalf' style='font-size: 20vw;'></div>
 <div id='div1'></div>
 <div id='div2'></div>
 <span id='span3'></span>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <script>
 
-var socket = io();
-
-var div0 = document.getElementById('div0');
-var divHalf = document.getElementById('div0.5');
-var div1 = document.getElementById('div1');
-var div2 = document.getElementById('div2');
-var span3 = document.getElementById('span3');
-var headline = document.getElementById('headline');
-var song1 = document.getElementById('Song 1');
-var song2 = document.getElementById('Song 2');
-var song3 = document.getElementById('Song 3');
+$.getScript('./emergencyButton.js', function() {
+    console.log('fetched');
+});
 
 var successCounter = 0;
 var taskGenerated = false;
-var taskShowing = false;
 
 /* ------perform initial setup---------*/
 
-socket.emit('type', {
-    type: 'meeting'
-});
+var div1 = document.getElementById('div1');
+var span3 = document.getElementById('span3');
 
-document.body.style = "background-color:green";
-
-headline.innerHTML = "No Meeting Called";
-
-var emergencyButton = document.createElement('button');
-emergencyButton.id = "emergencyButton";
-emergencyButton.innerHTML = "CALL MEETING";
-emergencyButton.className = "emergencyButton";
-// sizes based on view width
-emergencyButton.style = "border-radius: 40vw;"
-                    +   " height: 80vw;"
-                    +   " width: 80vw;"
-                    // These next three lines center it somehow
-                    +   "position: fixed;"
-                    +   "top: 80vw; left: 50%;"
-                    +   "transform: translate(-50%, -50%);"
-                    +   " background-color: pink;"
-                    +   " font-size: 75px";
-emergencyButton.removeEventListener("click", emitEndMeeting);
-emergencyButton.addEventListener("click", emitCallMeeting);
-div2.appendChild(emergencyButton);
-
-var showTask = document.createElement('button');
-showTask.innerHTML = 'Show Task';
-showTask.style = 'border-radius: 10vw; height: 20vw; width: 20vw;'
-            +   'position: fixed; top: 15vw; left: 85%;'
-            +   'transform: translate(-50%, -50%);'
-            +   'font-size: 3vw';
-div2.appendChild(showTask);
-showTask.addEventListener("click", toggleTask);
-
-div0.hidden = true;
-div2.hidden = true;
-headline.hidden = true;
-showTask.hidden = true;
-// divHalf.hidden =true;
-// div1.hidden = true;
-// span3.hidden = true;
 generateTask();
 
 // create show/hide task button
 keyPadButton('Hide Task', span3, 'orange', '6', toggleTask);
 
+// hide appropriate things
+div1.hidden = true;
+span3.hidden = true;
+divHalf.hidden = true;
+
 /*--------------------initial setup done------------------*/
 
 function toggleTask() {
     if (!taskGenerated) {
-        
         taskGenerated = true;
     }
     taskShowing = !taskShowing;
@@ -104,12 +61,6 @@ function toggleTask() {
     divHalf.hidden = !divHalf.hidden;
     headline.hidden = !headline.hidden;
     showTask.hidden = !showTask.hidden;
-    song1.play();
-    song1.pause();
-    song2.play();
-    song2.pause();
-    song3.play();
-    song3.pause();
     if (div1.hidden) {
         utterance.onend = function() {};
     } else {
@@ -138,7 +89,7 @@ function generateTask() {
     keyPadButton(7, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 7; });
     keyPadButton(8, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 8; });
     keyPadButton(9, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 9; });
-    keyPadButton('✓', div1, 'green', '15', function(){
+    keyPadButton('✓', div1, 'lightgreen', '15', function(){
         if (display.innerHTML == codeGenerator.code) {
             display.innerHTML = 'SUCCESS';
             setTimeout(function() {
@@ -280,7 +231,7 @@ function generateCode() {
         utterance.onend = function(){
                 synth.speak(utterance);
             };
-        synth.speak(utterance);
+        // synth.speak(utterance);
     }
 
     var letters = codeWritten[0] + codeWritten[1] + codeWritten[2];
@@ -295,96 +246,6 @@ function keyPadButton(value, container, color, fontSize, action) {
     button.className = 'task';
     container.appendChild(button);
     button.addEventListener('click', action);
-}
-
-// listens for timer updates
-socket.on('updateTimer', function(data) {
-    var timer = new Date(data.date);
-    div0.innerHTML = timer.toISOString().substr(14,5);
-    divHalf.innerHTML = timer.toISOString().substr(14,5);
-})
-
-// listens for callMeeting
-socket.on('callMeeting', function () {
-    callMeeting();
-    if (taskShowing) {
-        toggleTask();
-    }
-})
-
-// listens for endMeeting
-socket.on('endMeeting', function () {
-    endMeeting();
-    if (!taskShowing) {
-        toggleTask();
-    }
-})
-
-// song is an integer which selects which song should play
-var song = 0;
-socket.on('songSelect', function(data) {
-    song = data.song;
-})
-
-
-// These functions emit signals without creating a loop where those signals then call themselves
-function emitCallMeeting() {
-    socket.emit('callMeeting');
-}
-
-function emitEndMeeting() {
-    socket.emit('endMeeting');
-}
-
-// Calls emergency meeting
-function callMeeting() {
-
-    document.body.style = "background-color:red";
-
-    switch (song) {
-        case 0: song1.currentTime = 0; 
-            song1.play();
-            break;
-        case 1: song2.currentTime = 0;
-            song2.play();
-            break;
-        case 2: song3.currentTime = 0;
-            song3.play();
-            break;
-        default: break;
-    }
-
-    headline.innerHTML = "EMERGENCY MEETING";
-
-    var emergencyButton = document.getElementById('emergencyButton');
-
-    if (typeof(emergencyButton) != 'undefined' && emergencyButton != null) {
-        emergencyButton.innerHTML = "End Meeting";
-
-        // removes the onclick event from the emergency button and replaces
-        emergencyButton.removeEventListener("click", emitCallMeeting);
-        emergencyButton.addEventListener("click", emitEndMeeting);
-    }
-}
-
-function endMeeting() {
-    song1.pause();
-    song2.pause();
-    song3.pause();
-
-    document.body.style = "background-color:green";
-
-    headline.innerHTML = "No Meeting Called";
-    
-    var emergencyButton = document.getElementById('emergencyButton');
-
-    if (typeof(emergencyButton) != 'undefined' && emergencyButton != null) {
-        emergencyButton.innerHTML = "CALL MEETING";
-
-        // removes the onclick event from the emergency button and replaces
-        emergencyButton.removeEventListener("click", emitEndMeeting);
-        emergencyButton.addEventListener("click", emitCallMeeting);
-    }
 }
 
 </script>

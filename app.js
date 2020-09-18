@@ -8,9 +8,15 @@ var serv = require('http').Server(app);
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
 });
+
 app.get('/keyCode', function(req, res) {
     res.sendFile(__dirname + '/client/keyCode.html');
 });
+
+app.get('/emergencyButton.js', function(req, res) {
+    res.sendFile(__dirname + '/client/emergencyButton.js');
+});
+
 app.use('client', express.static(__dirname + '/client'));
 app.use(express.static('sounds'));
 app.get('/favicon.ico', (req, res) => res.status(204));
