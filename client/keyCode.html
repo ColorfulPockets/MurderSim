@@ -1,0 +1,390 @@
+<head>
+    <title id='title'>Meeting Button</title>
+</head>
+
+<audio id="Song 1" src="Song1.mp3" type="audio/mp3"> </audio>
+<audio id="Song 2" src="Song2.mp3" type="audio/mp3"> </audio>
+<audio id="Song 3" src="Song3.mp3" type="audio/mp3"> </audio>
+
+<div id='div0' style='font-size: 20vw;
+    position: fixed;
+    top: 200px; left: 50%;
+    transform: translate(-50%, -50%);'>
+</div>
+
+<h1 id='headline' style='font-size: 6vw' style='font-size: 20vw;
+        text-align: center;'>
+</h1>
+
+<div id='div0.5' style='font-size: 20vw;'></div>
+<div id='div1'></div>
+<div id='div2'></div>
+<span id='span3'></span>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+
+var socket = io();
+
+var div0 = document.getElementById('div0');
+var divHalf = document.getElementById('div0.5');
+var div1 = document.getElementById('div1');
+var div2 = document.getElementById('div2');
+var span3 = document.getElementById('span3');
+var headline = document.getElementById('headline');
+var song1 = document.getElementById('Song 1');
+var song2 = document.getElementById('Song 2');
+var song3 = document.getElementById('Song 3');
+
+var successCounter = 0;
+var taskGenerated = false;
+var taskShowing = false;
+
+/* ------perform initial setup---------*/
+
+socket.emit('type', {
+    type: 'meeting'
+});
+
+document.body.style = "background-color:green";
+
+headline.innerHTML = "No Meeting Called";
+
+var emergencyButton = document.createElement('button');
+emergencyButton.id = "emergencyButton";
+emergencyButton.innerHTML = "CALL MEETING";
+emergencyButton.className = "emergencyButton";
+// sizes based on view width
+emergencyButton.style = "border-radius: 40vw;"
+                    +   " height: 80vw;"
+                    +   " width: 80vw;"
+                    // These next three lines center it somehow
+                    +   "position: fixed;"
+                    +   "top: 80vw; left: 50%;"
+                    +   "transform: translate(-50%, -50%);"
+                    +   " background-color: pink;"
+                    +   " font-size: 75px";
+emergencyButton.removeEventListener("click", emitEndMeeting);
+emergencyButton.addEventListener("click", emitCallMeeting);
+div2.appendChild(emergencyButton);
+
+var showTask = document.createElement('button');
+showTask.innerHTML = 'Show Task';
+showTask.style = 'border-radius: 10vw; height: 20vw; width: 20vw;'
+            +   'position: fixed; top: 15vw; left: 85%;'
+            +   'transform: translate(-50%, -50%);'
+            +   'font-size: 3vw';
+div2.appendChild(showTask);
+showTask.addEventListener("click", toggleTask);
+
+div0.hidden = true;
+div2.hidden = true;
+headline.hidden = true;
+showTask.hidden = true;
+// divHalf.hidden =true;
+// div1.hidden = true;
+// span3.hidden = true;
+generateTask();
+
+// create show/hide task button
+keyPadButton('Hide Task', span3, 'orange', '6', toggleTask);
+
+/*--------------------initial setup done------------------*/
+
+function toggleTask() {
+    if (!taskGenerated) {
+        
+        taskGenerated = true;
+    }
+    taskShowing = !taskShowing;
+    div2.hidden = !div2.hidden;
+    div1.hidden = !div1.hidden;
+    div0.hidden = !div0.hidden;
+    span3.hidden = !span3.hidden;
+    divHalf.hidden = !divHalf.hidden;
+    headline.hidden = !headline.hidden;
+    showTask.hidden = !showTask.hidden;
+    song1.play();
+    song1.pause();
+    song2.play();
+    song2.pause();
+    song3.play();
+    song3.pause();
+    if (div1.hidden) {
+        utterance.onend = function() {};
+    } else {
+        utterance.onend = function() {synth.speak(utterance);};
+        synth.speak(utterance);
+    }
+}
+
+function generateTask() {
+    var codeGenerator = generateCode();
+    var display = document.createElement('div');
+    display.style = "border-style: solid; background-color: grey; width: 98vw; "
+                    + "height: 15vw; font-size: 13vw; text-align: center";
+    div1.appendChild(display);
+
+    var br = document.createElement('br');
+    div1.appendChild(br);
+
+    // create the keypad
+    keyPadButton(1, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 1; });
+    keyPadButton(2, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 2; });
+    keyPadButton(3, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 3; });
+    keyPadButton(4, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 4; });
+    keyPadButton(5, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 5; });
+    keyPadButton(6, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 6; });
+    keyPadButton(7, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 7; });
+    keyPadButton(8, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 8; });
+    keyPadButton(9, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 9; });
+    keyPadButton('✓', div1, 'green', '15', function(){
+        if (display.innerHTML == codeGenerator.code) {
+            display.innerHTML = 'SUCCESS';
+            setTimeout(function() {
+                display.innerHTML = "";
+            }, 3000);
+            successCounter += 1;
+            utterance.onend = function() {};
+            codeGenerator = generateCode();
+            codeContainer.innerHTML = codeGenerator.letters;
+        } else if (display.innerHTML == '0000') {
+            display.innerHTML = 'SUCCESSES: ' + successCounter;
+            utterance.onend = function() {};
+        }
+    });
+    keyPadButton(0, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 0; });
+    keyPadButton('<', div1, 'red', '15', function(){ display.innerHTML = display.innerHTML.substr(0, display.innerHTML.length - 1)});
+
+    codeContainer = document.createElement('span');
+    codeContainer.style = 'font-size: 13vw; text-align: right';
+    span3.appendChild(codeContainer);
+    codeContainer.innerHTML = 'Code: ' + codeGenerator.letters;
+    codeContainer.hidden = true;
+}
+
+
+
+function generateCode() {
+    // generate the code
+    var codeLetters = [Math.floor(Math.random()*6), Math.floor(Math.random()*6), Math.floor(Math.random()*6)];
+    while (codeLetters[0] == codeLetters[1]) {
+        codeLetters[1] = Math.floor(Math.random()*6);
+    }
+    while (codeLetters[2] == codeLetters[1] || codeLetters[2] == codeLetters[0]) {
+        codeLetters[2] = Math.floor(Math.random()*6);
+    }
+    
+    var codeWritten = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
+    var code = codeWritten[0].toString() + codeWritten[1].toString() + codeWritten[2].toString();
+
+    for (i in codeLetters) {
+        switch (codeLetters[i]) {
+            case 0:
+                codeLetters[i] = 'Alpha'
+                switch (codeWritten[i]) {
+                    case 0: codeWritten[i] = 'D'; break;
+                    case 1: codeWritten[i] = 'G'; break;
+                    case 2: codeWritten[i] = 'I'; break;
+                    case 3: codeWritten[i] = 'A'; break;
+                    case 4: codeWritten[i] = 'C'; break;
+                    case 5: codeWritten[i] = 'F'; break;
+                    case 6: codeWritten[i] = 'H'; break;
+                    case 7: codeWritten[i] = 'B'; break;
+                    case 8: codeWritten[i] = 'J'; break;
+                    case 9: codeWritten[i] = 'E'; break;
+                }
+                break;
+            case 1:
+                switch (codeWritten[i]) {
+                    case 0: codeWritten[i] = 'F'; break;
+                    case 1: codeWritten[i] = 'G'; break;
+                    case 2: codeWritten[i] = 'C'; break;
+                    case 3: codeWritten[i] = 'D'; break;
+                    case 4: codeWritten[i] = 'H'; break;
+                    case 5: codeWritten[i] = 'I'; break;
+                    case 6: codeWritten[i] = 'A'; break;
+                    case 7: codeWritten[i] = 'E'; break;
+                    case 8: codeWritten[i] = 'B'; break;
+                    case 9: codeWritten[i] = 'J'; break;
+                }
+                codeLetters[i] = 'Bravo'
+                break;
+            case 2:
+                switch (codeWritten[i]) {
+                    case 0: codeWritten[i] = 'H'; break;
+                    case 1: codeWritten[i] = 'A'; break;
+                    case 2: codeWritten[i] = 'D'; break;
+                    case 3: codeWritten[i] = 'B'; break;
+                    case 4: codeWritten[i] = 'E'; break;
+                    case 5: codeWritten[i] = 'C'; break;
+                    case 6: codeWritten[i] = 'F'; break;
+                    case 7: codeWritten[i] = 'I'; break;
+                    case 8: codeWritten[i] = 'G'; break;
+                    case 9: codeWritten[i] = 'J'; break;
+                }
+                codeLetters[i] = 'Charlie'
+                break;
+            case 3:
+                switch (codeWritten[i]) {
+                    case 0: codeWritten[i] = 'C'; break;
+                    case 1: codeWritten[i] = 'I'; break;
+                    case 2: codeWritten[i] = 'H'; break;
+                    case 3: codeWritten[i] = 'B'; break;
+                    case 4: codeWritten[i] = 'J'; break;
+                    case 5: codeWritten[i] = 'D'; break;
+                    case 6: codeWritten[i] = 'G'; break;
+                    case 7: codeWritten[i] = 'F'; break;
+                    case 8: codeWritten[i] = 'E'; break;
+                    case 9: codeWritten[i] = 'A'; break;
+                }
+                codeLetters[i] = 'Delta'
+                break;
+            case 4:
+                switch (codeWritten[i]) {
+                    case 0: codeWritten[i] = 'E'; break;
+                    case 1: codeWritten[i] = 'C'; break;
+                    case 2: codeWritten[i] = 'A'; break;
+                    case 3: codeWritten[i] = 'F'; break;
+                    case 4: codeWritten[i] = 'B'; break;
+                    case 5: codeWritten[i] = 'I'; break;
+                    case 6: codeWritten[i] = 'H'; break;
+                    case 7: codeWritten[i] = 'D'; break;
+                    case 8: codeWritten[i] = 'G'; break;
+                    case 9: codeWritten[i] = 'J'; break;
+                }
+                codeLetters[i] = 'Echo'
+                break;
+            case 5:
+                switch (codeWritten[i]) {
+                    case 0: codeWritten[i] = 'B'; break;
+                    case 1: codeWritten[i] = 'D'; break;
+                    case 2: codeWritten[i] = 'E'; break;
+                    case 3: codeWritten[i] = 'F'; break;
+                    case 4: codeWritten[i] = 'G'; break;
+                    case 5: codeWritten[i] = 'A'; break;
+                    case 6: codeWritten[i] = 'H'; break;
+                    case 7: codeWritten[i] = 'I'; break;
+                    case 8: codeWritten[i] = 'J'; break;
+                    case 9: codeWritten[i] = 'C'; break;
+                }
+                codeLetters[i] = 'Foxtrot'
+                break;    
+        }
+    }
+
+    //  ensure that TTS works
+    if ('speechSynthesis' in window){
+        synth = speechSynthesis;
+        utterance = new SpeechSynthesisUtterance(codeLetters[0] + ". " + codeLetters[1] + ". " + codeLetters[2] + ". Stop.");
+        utterance.onend = function(){
+                synth.speak(utterance);
+            };
+        synth.speak(utterance);
+    }
+
+    var letters = codeWritten[0] + codeWritten[1] + codeWritten[2];
+    return {letters: letters, code: code};
+}
+
+function keyPadButton(value, container, color, fontSize, action) {
+    var button = document.createElement('button');
+    button.style = "width: 31.5vw; height: 25vw; font-size: "+ fontSize +"vw; text-align: center; "
+                +   "-webkit-appearance: none; border-radius: 0; padding: 0; background-color: " + color;
+    button.innerHTML = value;
+    button.className = 'task';
+    container.appendChild(button);
+    button.addEventListener('click', action);
+}
+
+// listens for timer updates
+socket.on('updateTimer', function(data) {
+    var timer = new Date(data.date);
+    div0.innerHTML = timer.toISOString().substr(14,5);
+    divHalf.innerHTML = timer.toISOString().substr(14,5);
+})
+
+// listens for callMeeting
+socket.on('callMeeting', function () {
+    callMeeting();
+    if (taskShowing) {
+        toggleTask();
+    }
+})
+
+// listens for endMeeting
+socket.on('endMeeting', function () {
+    endMeeting();
+    if (!taskShowing) {
+        toggleTask();
+    }
+})
+
+// song is an integer which selects which song should play
+var song = 0;
+socket.on('songSelect', function(data) {
+    song = data.song;
+})
+
+
+// These functions emit signals without creating a loop where those signals then call themselves
+function emitCallMeeting() {
+    socket.emit('callMeeting');
+}
+
+function emitEndMeeting() {
+    socket.emit('endMeeting');
+}
+
+// Calls emergency meeting
+function callMeeting() {
+
+    document.body.style = "background-color:red";
+
+    switch (song) {
+        case 0: song1.currentTime = 0; 
+            song1.play();
+            break;
+        case 1: song2.currentTime = 0;
+            song2.play();
+            break;
+        case 2: song3.currentTime = 0;
+            song3.play();
+            break;
+        default: break;
+    }
+
+    headline.innerHTML = "EMERGENCY MEETING";
+
+    var emergencyButton = document.getElementById('emergencyButton');
+
+    if (typeof(emergencyButton) != 'undefined' && emergencyButton != null) {
+        emergencyButton.innerHTML = "End Meeting";
+
+        // removes the onclick event from the emergency button and replaces
+        emergencyButton.removeEventListener("click", emitCallMeeting);
+        emergencyButton.addEventListener("click", emitEndMeeting);
+    }
+}
+
+function endMeeting() {
+    song1.pause();
+    song2.pause();
+    song3.pause();
+
+    document.body.style = "background-color:green";
+
+    headline.innerHTML = "No Meeting Called";
+    
+    var emergencyButton = document.getElementById('emergencyButton');
+
+    if (typeof(emergencyButton) != 'undefined' && emergencyButton != null) {
+        emergencyButton.innerHTML = "CALL MEETING";
+
+        // removes the onclick event from the emergency button and replaces
+        emergencyButton.removeEventListener("click", emitEndMeeting);
+        emergencyButton.addEventListener("click", emitCallMeeting);
+    }
+}
+
+</script>

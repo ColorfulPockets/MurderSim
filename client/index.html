@@ -28,9 +28,11 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
+
 var socket = io();
 
 var div0 = document.getElementById('div0');
+var div1 = document.getElementById('div1');
 var song1 = document.getElementById('Song 1');
 var song2 = document.getElementById('Song 2');
 var song3 = document.getElementById('Song 3');
@@ -101,7 +103,6 @@ function meetingButton() {
     emergencyButton.removeEventListener("click", emitEndMeeting);
     emergencyButton.addEventListener("click", emitCallMeeting);
 
-    var div1 = document.getElementById('div1');
     div1.appendChild(emergencyButton);
 }
 
@@ -171,12 +172,25 @@ function task() {
     });
 
     removeButtons();
+
+    var keyCodeButton = document.createElement('button');
+    keyCodeButton.id = 't1';
+    keyCodeButton.innerHTML = "Key Code";
+    div1.appendChild(keyCodeButton);
+    keyCodeButton.addEventListener('click', function() {
+        window.location.href = "/keyCode"
+    });
 }
 
 function removeButtons() {
     document.getElementById("b1").remove();
     document.getElementById("b2").remove();
     document.getElementById("b3").remove();
+}
+
+function removeTaskButtons() {
+    document.getElementById('headline').remove();
+    document.getElementById('t1').remove();
 }
 
 </script>
