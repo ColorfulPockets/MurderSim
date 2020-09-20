@@ -1,0 +1,136 @@
+<head>
+    <title>
+        Wait 5
+    </title>
+    <!-- this style makes text unselectable to make buttons
+        easier to press on mobile -->
+    <style>
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }    
+    </style>
+</head>
+
+<audio id="Song 1" src="Song1.mp3" type="audio/mp3"> </audio>
+<audio id="Song 2" src="Song2.mp3" type="audio/mp3"> </audio>
+<audio id="Song 3" src="Song3.mp3" type="audio/mp3"> </audio>
+
+<div id='div0' style='font-size: 20vw;
+    position: fixed;
+    top: 200px; left: 50%;
+    transform: translate(-50%, -50%);'>
+</div>
+
+<h1 id='headline' style='font-size: 6vw' style='font-size: 20vw;
+        text-align: center;'>
+</h1>
+
+<span id='spanHalf'>
+    <span id='taskTimer' style='font-size: 20vw;'></span>
+    <button id='hideTask'></button>
+</span>
+
+<div id='div1'></div>
+
+<div id='div2'></div>
+<div id='playerSelect'></div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script>
+
+taskID = 'waitFiveSeconds';
+
+var meetingCalled = false;
+var completeTaskButton = document.createElement('button');
+
+$.getScript('./emergencyButton.js', function() {
+    console.log('fetched emergencyButton.js');
+    $.getScript('./playerSelect.js', function() {
+        console.log('fetched playerSelect.js');
+        socket.on('callMeeting', function() {
+            meetingCalled = true;
+            completeTaskButton.innerHTML = 'Complete Task';
+        });
+
+        socket.on('endMeeting', function() {
+            meetingCalled = false;
+        });
+    });
+});
+
+var div1 = document.getElementById('div1');
+div1.hidden = true;
+
+var selectNumberSpan = document.createElement('span');
+div1.appendChild(selectNumberSpan);
+
+var numberInput = document.createElement('input');
+selectNumberSpan.appendChild(numberInput);
+numberInput.type = 'number';
+numberInput.style = 'font-size: 5vw';
+
+var submitButton = document.createElement('button');
+submitButton.style = 'height: 7vw; width: 20vw';
+submitButton.innerHTML = 'Submit';
+selectNumberSpan.appendChild(submitButton);
+submitButton.addEventListener('click', function() {
+    if (numberInput.value > 0) {
+        taskID = 'waitFiveSeconds ' + numberInput.value;
+        selectNumberSpan.remove();
+    }
+});
+
+var divider1 = document.createElement('br');
+selectNumberSpan.appendChild(divider1);
+var divider2 = document.createElement('br');
+selectNumberSpan.appendChild(divider2);
+
+completeTaskButton.style = 'width: 50vw; height: 25vw; -webkit-appearance: none; border-radius: 0;'
+                        +   'font-size: 7vw; background-color: lightgrey;'
+                        +   'transform: translate(50%, 0%)';
+completeTaskButton.innerHTML = 'Complete Task';
+div1.appendChild(completeTaskButton);
+completeTaskButton.addEventListener('click', function() {
+    completeTaskButton.innerHTML = 'Processing...';
+    setTimeout( function() {
+        if (!meetingCalled) {
+            completeTaskButton.innerHTML = 'Success!'
+            setTimeout(function() {
+                playerSelectDiv.hidden = false;
+                setTimeout(function() {
+                    if (!playerSelectDiv.hidden) {
+                        playerSelectDiv.hidden = true;
+                        playerSelected();
+                    }
+                }, 10000);
+            }, 1000);
+        }
+    }, 5000);
+});
+
+function toggleTask() {
+    div0.hidden = !div0.hidden;
+    headline.hidden = !headline.hidden;
+    div2.hidden = !div2.hidden;
+    taskTimer.hidden = !taskTimer.hidden;
+    showTask.hidden = !showTask.hidden;
+    hideTask.hidden = !hideTask.hidden;
+    taskShowing = !taskShowing
+    /* ------- NEW STUFF -----------*/
+    div1.hidden = !div1.hidden;
+}
+
+function playerSelected() {
+    if (completeTaskButton.hidden) {
+        completeTaskButton.hidden = false;
+    }
+    completeTaskButton.innerHTML = 'Complete Task';
+}
+
+</script>

@@ -13,8 +13,16 @@ app.get('/keyCode', function(req, res) {
     res.sendFile(__dirname + '/client/keyCode.html');
 });
 
+app.get('/waitFiveSeconds', function(req, res) {
+    res.sendFile(__dirname + '/client/waitFiveSeconds.html');
+});
+
 app.get('/emergencyButton.js', function(req, res) {
     res.sendFile(__dirname + '/client/emergencyButton.js');
+});
+
+app.get('/playerSelect.js', function(req, res) {
+    res.sendFile(__dirname + '/client/playerSelect.js');
 });
 
 app.use('client', express.static(__dirname + '/client'));
@@ -80,6 +88,10 @@ io.sockets.on('connection', function(socket) {
         
             }
         }
+    });
+
+    socket.on('playerDidTask', function(data) {
+        console.log(data.player + ' did ' + data.task);
     });
 })
 

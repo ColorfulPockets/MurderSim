@@ -1,5 +1,17 @@
 <head>
-    <title id='title'>Meeting Button</title>
+    <title id='title'>Key Code</title>
+    <!-- this style makes text unselectable to make buttons
+        easier to press on mobile -->
+    <style>
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }    
+    </style>
 </head>
 
 <audio id="Song 1" src="Song1.mp3" type="audio/mp3"> </audio>
@@ -16,17 +28,27 @@
         text-align: center;'>
 </h1>
 
-<div id='divHalf' style='font-size: 20vw;'></div>
+<span id='spanHalf'>
+    <span id='taskTimer' style='font-size: 20vw;'></span>
+    <button id='hideTask'></button>
+</span>
 <div id='div1'></div>
 <div id='div2'></div>
 <span id='span3'></span>
+
+<div id='playerSelect'></div>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <script>
 
+taskID = 'keyCode';
+
 $.getScript('./emergencyButton.js', function() {
-    console.log('fetched');
+    console.log('fetched emergencyButton.js');
+    $.getScript('./playerSelect.js', function() {
+        console.log('fetched playerSelect.js');
+    });
 });
 
 var successCounter = 0;
@@ -39,13 +61,9 @@ var span3 = document.getElementById('span3');
 
 generateTask();
 
-// create show/hide task button
-keyPadButton('Hide Task', span3, 'orange', '6', toggleTask);
-
 // hide appropriate things
 div1.hidden = true;
 span3.hidden = true;
-divHalf.hidden = true;
 
 /*--------------------initial setup done------------------*/
 
@@ -58,9 +76,11 @@ function toggleTask() {
     div1.hidden = !div1.hidden;
     div0.hidden = !div0.hidden;
     span3.hidden = !span3.hidden;
-    divHalf.hidden = !divHalf.hidden;
+    codeContainer.hidden = !codeContainer.hidden;
+    taskTimer.hidden = !taskTimer.hidden;
     headline.hidden = !headline.hidden;
     showTask.hidden = !showTask.hidden;
+    hideTask.hidden = !hideTask.hidden;
     if (div1.hidden) {
         utterance.onend = function() {};
     } else {
@@ -70,7 +90,7 @@ function toggleTask() {
 }
 
 function generateTask() {
-    var codeGenerator = generateCode();
+    codeGenerator = generateCode();
     var display = document.createElement('div');
     display.style = "border-style: solid; background-color: grey; width: 98vw; "
                     + "height: 15vw; font-size: 13vw; text-align: center";
@@ -95,26 +115,34 @@ function generateTask() {
             setTimeout(function() {
                 display.innerHTML = "";
             }, 3000);
-            successCounter += 1;
-            utterance.onend = function() {};
-            codeGenerator = generateCode();
-            codeContainer.innerHTML = codeGenerator.letters;
+            setTimeout(function() {
+                playerSelectDiv.hidden = false;
+            }, 1000);
         } else if (display.innerHTML == '0000') {
             display.innerHTML = 'SUCCESSES: ' + successCounter;
             utterance.onend = function() {};
+        } else {
+            display.innerHTML = 'INCORRECT';
+            setTimeout(function() {
+                display.innerHTML = "";
+            }, 3000);
         }
     });
     keyPadButton(0, div1, 'lightgrey', '15', function() {display.innerHTML = display.innerHTML + 0; });
     keyPadButton('<', div1, 'red', '15', function(){ display.innerHTML = display.innerHTML.substr(0, display.innerHTML.length - 1)});
 
-    codeContainer = document.createElement('span');
-    codeContainer.style = 'font-size: 13vw; text-align: right';
+    codeContainer = document.createElement('div');
+    codeContainer.style = 'font-size: 13vw';
     span3.appendChild(codeContainer);
     codeContainer.innerHTML = 'Code: ' + codeGenerator.letters;
     codeContainer.hidden = true;
 }
 
-
+function playerSelected() {
+    successCounter += 1;
+    codeGenerator = generateCode();
+    codeContainer.innerHTML = codeGenerator.letters;
+}
 
 function generateCode() {
     // generate the code
@@ -228,6 +256,7 @@ function generateCode() {
     if ('speechSynthesis' in window){
         synth = speechSynthesis;
         utterance = new SpeechSynthesisUtterance(codeLetters[0] + ". " + codeLetters[1] + ". " + codeLetters[2] + ". Stop.");
+        utterance.volume = 0.5;
         utterance.onend = function(){
                 synth.speak(utterance);
             };
@@ -240,10 +269,11 @@ function generateCode() {
 
 function keyPadButton(value, container, color, fontSize, action) {
     var button = document.createElement('button');
-    button.style = "width: 31.5vw; height: 25vw; font-size: "+ fontSize +"vw; text-align: center; "
-                +   "-webkit-appearance: none; border-radius: 0; padding: 0; background-color: " + color;
+    button.style = "width: 31.5vw; height: 23vw; font-size: "+ fontSize +"vw; text-align: center; "
+                +   "-webkit-appearance: none; border-radius: 0;"
+                +   " padding: 0; touch-action: manipulation; background-color: " + color;
+                // touch-action: manipulation prevents double tap zoom
     button.innerHTML = value;
-    button.className = 'task';
     container.appendChild(button);
     button.addEventListener('click', action);
 }

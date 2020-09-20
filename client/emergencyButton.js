@@ -1,42 +1,33 @@
 /*
+-----------------INCLUDE IN FILE:-------------------------
 
-NOTE: Script on page will need:
-    * toggleTask()
-        * must toggle hidden: div0, divHalf, div2, headline,
-        * must toggle: taskShowing
+<audio id="Song 1" src="Song1.mp3" type="audio/mp3"> </audio>
+<audio id="Song 2" src="Song2.mp3" type="audio/mp3"> </audio>
+<audio id="Song 3" src="Song3.mp3" type="audio/mp3"> </audio>
 
-Page must have;
-    * div0
-    * divHalf - contains the timer while the task is showing
-    * div2
-    * headline
-    * songs
+<div id='div0' style='font-size: 20vw;
+    position: fixed;
+    top: 200px; left: 50%;
+    transform: translate(-50%, -50%);'>
+</div>
 
-Must hide:
-    * any divs used by the task
+<h1 id='headline' style='font-size: 6vw' style='font-size: 20vw;
+        text-align: center;'>
+</h1>
 
+<span id='spanHalf'>
+    <span id='taskTimer' style='font-size: 20vw;'></span>
+    <button id='hideTask'></button>
+</span>
+<div id='div2'></div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+
+
+MUST INCLUDE: toggleTask()
 */ 
-
-/*
-
-
-
-
-
-            TODO: MAKE A STANDARD HIDE TASK BUTTON
-
-
-
-
-
-
-
-
-
-
-
-*/
-
 
 var socket = io();
 
@@ -48,21 +39,27 @@ socket.emit('type', {
 
 
 var div0 = document.getElementById('div0');
-var divHalf = document.getElementById('divHalf');
+var taskTimer = document.getElementById('taskTimer');
+var hideTask = document.getElementById('hideTask');
 var div2 = document.getElementById('div2');
 var headline = document.getElementById('headline');
 var song1 = document.getElementById('Song 1');
 var song2 = document.getElementById('Song 2');
 var song3 = document.getElementById('Song 3');
-song1.volume = 0.5;
-song2.volume = 0.5;
-song3.volume = 0.5;
 
+taskTimer.hidden = true;
 var taskShowing = false;
 
 document.body.style = "background-color:green";
 
 headline.innerHTML = "No Meeting Called";
+
+hideTask.style = 'border-radius: 9vw; height: 18vw; width: 18vw;'
+            +   'font-size: 3vw; margin: 2vw;'
+            +   'float:right';
+hideTask.innerHTML = 'Hide Task';
+hideTask.addEventListener('click', toggleTask);
+hideTask.hidden = true;
 
 var emergencyButton = document.createElement('button');
 emergencyButton.id = "emergencyButton";
@@ -100,12 +97,11 @@ showTask.addEventListener("click", function() {
     toggleTask()
 });
 
-
 // listens for timer updates
 socket.on('updateTimer', function(data) {
     var timer = new Date(data.date);
     div0.innerHTML = timer.toISOString().substr(14,5);
-    divHalf.innerHTML = timer.toISOString().substr(14,5);
+    taskTimer.innerHTML = timer.toISOString().substr(14,5);
 })
 
 // listens for callMeeting
@@ -114,6 +110,7 @@ socket.on('callMeeting', function () {
     if (taskShowing) {
         toggleTask();
     }
+    showTask.hidden = true;
 })
 
 // listens for endMeeting
@@ -147,12 +144,15 @@ function callMeeting() {
 
     switch (song) {
         case 0: song1.currentTime = 0; 
+            song1.volume = 0.25;
             song1.play();
             break;
         case 1: song2.currentTime = 0;
+            song2.volume = 0.25;
             song2.play();
             break;
         case 2: song3.currentTime = 0;
+            song3.volume = 0.15;
             song3.play();
             break;
         default: break;
@@ -175,6 +175,8 @@ function endMeeting() {
     song1.pause();
     song2.pause();
     song3.pause();
+
+    showTask.hidden = false;
 
     document.body.style = "background-color:green";
 

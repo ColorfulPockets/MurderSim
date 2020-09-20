@@ -1,0 +1,68 @@
+<head>
+    <title>
+        <!-- TODO -->
+    </title>
+    <!-- this style makes text unselectable to make buttons
+        easier to press on mobile -->
+    <style>
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }    
+    </style>
+</head>
+
+<audio id="Song 1" src="Song1.mp3" type="audio/mp3"> </audio>
+<audio id="Song 2" src="Song2.mp3" type="audio/mp3"> </audio>
+<audio id="Song 3" src="Song3.mp3" type="audio/mp3"> </audio>
+
+<div id='div0' style='font-size: 20vw;
+    position: fixed;
+    top: 200px; left: 50%;
+    transform: translate(-50%, -50%);'>
+</div>
+
+<h1 id='headline' style='font-size: 6vw' style='font-size: 20vw;
+        text-align: center;'>
+</h1>
+
+<span id='spanHalf'>
+    <span id='taskTimer' style='font-size: 20vw;'></span>
+    <button id='hideTask'></button>
+</span>
+<div id='div2'></div>
+<div id='playerSelect'></div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script>
+
+taskID = ''; // TODO
+
+$.getScript('./emergencyButton.js', function() {
+    console.log('fetched emergencyButton.js');
+    $.getScript('./playerSelect.js', function() {
+        console.log('fetched playerSelect.js');
+    });
+});
+
+function toggleTask() {
+    div0.hidden = !div0.hidden;
+    headline.hidden = !headline.hidden;
+    div2.hidden = !div2.hidden;
+    taskTimer.hidden = !taskTimer.hidden;
+    showTask.hidden = !showTask.hidden;
+    hideTask.hidden = !hideTask.hidden;
+    taskShowing = !taskShowing;
+    /* ------- NEW STUFF -----------*/
+}
+
+function playerSelected() {
+    // TODO
+}
+
+</script>

@@ -122,12 +122,15 @@ function callMeeting() {
 
     switch (song) {
         case 0: song1.currentTime = 0; 
+            song1.volume = 0.25;
             song1.play();
             break;
         case 1: song2.currentTime = 0;
+            song2.volume = 0.25;
             song2.play();
             break;
         case 2: song3.currentTime = 0;
+            song3.volume = 0.15;
             song3.play();
             break;
         default: break;
@@ -179,6 +182,14 @@ function task() {
     div1.appendChild(keyCodeButton);
     keyCodeButton.addEventListener('click', function() {
         window.location.href = "/keyCode"
+    });
+
+    var waitFiveSecondsButton = document.createElement('button');
+    waitFiveSecondsButton.id = 't2';
+    waitFiveSecondsButton.innerHTML = "Wait Five Seconds";
+    div1.appendChild(waitFiveSecondsButton);
+    waitFiveSecondsButton.addEventListener('click', function() {
+        window.location.href = "/waitFiveSeconds"
     });
 }
 
