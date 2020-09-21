@@ -21,6 +21,8 @@
 
 <br><br>
 
+<button onclick="addPlayers()" id = 'b4'>Add Players</button>
+<br><br>
 <button onclick="meetingButton()" id = 'b2'>Satellite</button>
 <button onclick="task()" id = 'b3'>Special Task</button>
 <br><br>
@@ -193,10 +195,15 @@ function task() {
     });
 }
 
+function addPlayers() {
+    window.location.href = '/addPlayers'
+}
+
 function removeButtons() {
     document.getElementById("b1").remove();
     document.getElementById("b2").remove();
     document.getElementById("b3").remove();
+    document.getElementById("b4").remove();
 }
 
 function removeTaskButtons() {

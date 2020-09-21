@@ -1,0 +1,39 @@
+<head>
+    <title>
+        Add Players
+    </title>
+</head>
+
+<div>
+    <div>Name:</div>
+    <input id='playerName' type='text'>
+    <br>
+    <div>ID:</div>
+    <input id='playerID' type='text'>
+    <br>
+    <button onclick="submitName()">Submit</button>
+    <br><br><br>
+    <button onclick="back()">Back</button>
+</div>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+    var playerNameField = document.getElementById('playerName');
+    var playerIDField = document.getElementById('playerID');
+    var socket = io();
+
+
+    function submitName() {
+        var name = playerNameField.value;
+        var playerID = playerIDField.value;
+        socket.emit('addPlayer', {
+            name: name,
+            playerID: playerID
+        });
+        playerNameField.value = "";
+        playerIDField.value = "";
+    }
+
+    function back() {
+        window.location.href = '/';
+    }
+</script>

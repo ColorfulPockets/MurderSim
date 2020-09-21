@@ -25,6 +25,10 @@ app.get('/playerSelect.js', function(req, res) {
     res.sendFile(__dirname + '/client/playerSelect.js');
 });
 
+app.get('/addPlayers', function(req, res) {
+    res.sendFile(__dirname + '/client/addPlayers.html');
+});
+
 app.use('client', express.static(__dirname + '/client'));
 app.use(express.static('sounds'));
 app.get('/favicon.ico', (req, res) => res.status(204));
@@ -92,6 +96,10 @@ io.sockets.on('connection', function(socket) {
 
     socket.on('playerDidTask', function(data) {
         console.log(data.player + ' did ' + data.task);
+    });
+
+    socket.on('addPlayer', function(data) {
+        console.log(data.name + " has entered the game with ID: " + data.playerID);
     });
 })
 
