@@ -29,6 +29,10 @@ app.get('/addPlayers', function(req, res) {
     res.sendFile(__dirname + '/client/addPlayers.html');
 });
 
+app.get('/addTasks', function(req, res) {
+    res.sendFile(__dirname + '/client/addTasks.html');
+});
+
 app.use('client', express.static(__dirname + '/client'));
 app.use(express.static('sounds'));
 app.get('/favicon.ico', (req, res) => res.status(204));

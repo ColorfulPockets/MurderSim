@@ -96,7 +96,10 @@ completeTaskButton.style = 'width: 50vw; height: 25vw; -webkit-appearance: none;
                         +   'transform: translate(50%, 0%)';
 completeTaskButton.innerHTML = 'Complete Task';
 div1.appendChild(completeTaskButton);
-completeTaskButton.addEventListener('click', function() {
+completeTaskButton.addEventListener('click', process);
+
+function process() {
+    completeTaskButton.removeEventListener('click', process);
     completeTaskButton.innerHTML = 'Processing...';
     setTimeout( function() {
         if (!meetingCalled) {
@@ -111,8 +114,11 @@ completeTaskButton.addEventListener('click', function() {
                 }, 10000);
             }, 1000);
         }
+        setTimeout ( function() {
+            completeTaskButton.addEventListener('click', process);
+        }, 1000);
     }, 5000);
-});
+}
 
 function toggleTask() {
     div0.hidden = !div0.hidden;
